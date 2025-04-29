@@ -20,7 +20,7 @@
             <div class="flex-1 p-6 overflow-y-auto space-y-4" id="messages">
                 <!-- Welcome Message -->
                 <div class="flex items-start space-x-4">
-                    <div class="flex-1 bg-gray-100 rounded-lg p-4 max-w-3xl ml-auto">
+                    <div class="flex-1 bg-gray-50 rounded-lg p-4 max-w-3xl mr-auto">
                         <p class="text-gray-800">Welcome to AutoTasker! How can I help you today?</p>
                     </div>
                 </div>
@@ -36,12 +36,14 @@
                     <button onclick="clearFiles()" class="text-sm text-red-600 hover:underline">Clear</button>
                 </div>
                 <!-- Image Preview Container -->
-                <div id="image-preview" class="mt-2 flex flex-wrap gap-2"></div>
+                <div class="mt-2 flex flex-wrap gap-2" id="image-preview">
+                    <div class="max-w-xs rounded"></div>
+                </div>
             </div>
 
             <!-- Input Area -->
             <div class="border-t border-gray-200 p-4">
-                <form id="chat-form" class="space-y-4">
+                <form id="chat-form" class="space-y-4" enctype="multipart/form-data">
                     <!-- Text Input -->
                     <div>
                         <textarea 
@@ -124,7 +126,7 @@
                     reader.onload = function(e) {
                         const img = document.createElement('img');
                         img.src = e.target.result;
-                        img.className = 'w-20 h-20 object-cover rounded';
+                        img.className = 'thumb';
                         imagePreview.appendChild(img);
                     }
                     reader.readAsDataURL(file);
@@ -147,7 +149,7 @@
             messageDiv.className = 'flex items-start space-x-4';
 
             const contentDiv = document.createElement('div');
-            contentDiv.className = 'flex-1 bg-blue-50 rounded-lg p-4 max-w-3xl mr-auto';
+            contentDiv.className = 'flex-1 bg-blue-100 rounded-lg p-4 max-w-3xl ml-auto';
 
             if (message) {
                 const messageP = document.createElement('p');
@@ -164,7 +166,7 @@
                     if (file.type?.startsWith('image/')) {
                         const img = document.createElement('img');
                         img.src = URL.createObjectURL(file);
-                        img.className = 'max-w-xs rounded';
+                        img.className = 'img-preview';
                         filesDiv.appendChild(img);
                     } else {
                         const fileLink = document.createElement('div');
@@ -189,7 +191,7 @@
             const welcomeDiv = document.createElement('div');
             welcomeDiv.className = 'flex items-start space-x-4';
             welcomeDiv.innerHTML = `
-                <div class="flex-1 bg-gray-100 rounded-lg p-4 max-w-3xl ml-auto">
+                <div class="flex-1 bg-gray-50 rounded-lg p-4 max-w-3xl mr-auto">
                     <p class="text-gray-800">Welcome to AutoTasker! How can I help you today?</p>
                 </div>
             `;
@@ -201,15 +203,42 @@
         imageInput.addEventListener('change', handleFileSelect);
 
         // Form submission
-        chatForm.addEventListener('submit', function(e) {
+        chatForm.addEventListener('submit', async function(e) {
             e.preventDefault();
             const message = messageInput.value.trim();
             const files = [...fileInput.files, ...imageInput.files];
 
             if (message || files.length > 0) {
-                addMessage(message, files);
-                messageInput.value = '';
-                clearFiles();
+                try {
+                    // Create FormData and append files
+                    const formData = new FormData();
+                    files.forEach(file => {
+                        formData.append('files', file);
+                    });
+
+                    // Upload files if any
+                    if (files.length > 0) {
+                        const response = await fetch('/upload/multiple', {
+                            method: 'POST',
+                            body: formData
+                        });
+
+                        if (!response.ok) {
+                            throw new Error('File upload failed');
+                        }
+
+                        const result = await response.json();
+                        console.log('Upload success:', result);
+                    }
+
+                    // Add message to chat
+                    addMessage(message, files);
+                    messageInput.value = '';
+                    clearFiles();
+                } catch (error) {
+                    console.error('Error:', error);
+                    alert('Failed to upload files: ' + error.message);
+                }
             }
         });
     </script>
