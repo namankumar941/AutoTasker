@@ -35,9 +35,19 @@
                     </div>
                     <button onclick="clearFiles()" class="text-sm text-red-600 hover:underline">Clear</button>
                 </div>
-                <!-- Image Preview Container -->
-                <div class="mt-2 flex flex-wrap gap-2" id="image-preview">
-                    <div class="max-w-xs rounded"></div>
+                <!-- File Preview Container -->
+                <div class="mt-2">
+                    <!-- Image Preview -->
+                    <div class="flex flex-wrap gap-2" id="image-preview"></div>
+                    <!-- PDF Preview -->
+                    <div class="mt-2 space-y-1" id="pdf-preview"></div>
+                </div>
+                <!-- Upload Progress -->
+                <div id="upload-progress" class="mt-2 hidden">
+                    <div class="w-full bg-gray-200 rounded-full h-2.5">
+                        <div class="bg-blue-600 h-2.5 rounded-full" style="width: 0%" id="progress-bar"></div>
+                    </div>
+                    <p class="text-sm text-gray-600 mt-1" id="progress-text">Uploading...</p>
                 </div>
             </div>
 
@@ -103,33 +113,99 @@
         const messageInput = document.getElementById('message-input');
         const messagesContainer = document.getElementById('messages');
 
+        // Track selected files
+        let selectedFiles = [];
+        const MAX_FILES = 2;
+
+        // Function to update upload button states
+        function updateUploadButtons() {
+            const fileLabel = fileInput.parentElement;
+            const imageLabel = imageInput.parentElement;
+            
+            if (selectedFiles.length >= MAX_FILES) {
+                fileLabel.classList.add('opacity-50', 'cursor-not-allowed');
+                imageLabel.classList.add('opacity-50', 'cursor-not-allowed');
+                fileInput.disabled = true;
+                imageInput.disabled = true;
+            } else {
+                fileLabel.classList.remove('opacity-50', 'cursor-not-allowed');
+                imageLabel.classList.remove('opacity-50', 'cursor-not-allowed');
+                fileInput.disabled = false;
+                imageInput.disabled = false;
+            }
+        }
+
         // Handle file selection
         function handleFileSelect(event) {
-            const files = event.target.files;
-            if (files.length > 0) {
-                showFilePreview(files);
+            const files = Array.from(event.target.files);
+            const remainingSlots = MAX_FILES - selectedFiles.length;
+
+            if (files.length > remainingSlots) {
+                alert(`You can only select ${remainingSlots} more file(s). Please clear some files first.`);
+                event.target.value = '';
+                return;
             }
+
+            // Add new files to selected files array
+            selectedFiles = [...selectedFiles, ...files];
+            updateUploadButtons();
+            showFilePreview(selectedFiles);
         }
 
         // Show file preview
         function showFilePreview(files) {
             previewArea.classList.remove('hidden');
-            fileList.textContent = Array.from(files).map(f => f.name).join(', ');
+            const fileNames = Array.from(files).map(f => f.name);
+            fileList.textContent = `Selected ${files.length} file(s): ${fileNames.join(', ')}`;
 
-            // Clear previous image previews
+            // Clear previous previews
             imagePreview.innerHTML = '';
+            document.getElementById('pdf-preview').innerHTML = '';
 
-            // Add image previews
+            // Process each file
             Array.from(files).forEach(file => {
                 if (file.type.startsWith('image/')) {
+                    // Image preview
                     const reader = new FileReader();
                     reader.onload = function(e) {
+                        const container = document.createElement('div');
+                        container.className = 'relative group';
+
                         const img = document.createElement('img');
                         img.src = e.target.result;
-                        img.className = 'thumb';
-                        imagePreview.appendChild(img);
+                        img.className = 'w-32 h-32 object-cover rounded border border-gray-300';
+                        container.appendChild(img);
+
+                        const overlay = document.createElement('div');
+                        overlay.className = 'absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity rounded flex items-center justify-center';
+                        
+                        const fileName = document.createElement('p');
+                        fileName.className = 'text-white text-xs text-center px-2';
+                        fileName.textContent = file.name;
+                        overlay.appendChild(fileName);
+                        
+                        container.appendChild(overlay);
+                        imagePreview.appendChild(container);
                     }
                     reader.readAsDataURL(file);
+                } else if (file.type === 'application/pdf') {
+                    // PDF preview
+                    const pdfContainer = document.createElement('div');
+                    pdfContainer.className = 'flex items-center space-x-2 p-2 border border-gray-200 rounded';
+
+                    const icon = document.createElement('div');
+                    icon.innerHTML = `<svg class="w-8 h-8 text-red-500" fill="currentColor" viewBox="0 0 20 20"><path d="M9 2a2 2 0 00-2 2v8a2 2 0 002 2h6a2 2 0 002-2V6.414A2 2 0 0016.414 5L14 2.586A2 2 0 0012.586 2H9z"></path></svg>`;
+                    
+                    const info = document.createElement('div');
+                    info.className = 'flex-1';
+                    info.innerHTML = `
+                        <p class="text-sm font-medium">${file.name}</p>
+                        <p class="text-xs text-gray-500">${(file.size / 1024).toFixed(1)} KB</p>
+                    `;
+
+                    pdfContainer.appendChild(icon);
+                    pdfContainer.appendChild(info);
+                    document.getElementById('pdf-preview').appendChild(pdfContainer);
                 }
             });
         }
@@ -141,6 +217,9 @@
             previewArea.classList.add('hidden');
             fileList.textContent = '';
             imagePreview.innerHTML = '';
+            document.getElementById('pdf-preview').innerHTML = '';
+            selectedFiles = [];
+            updateUploadButtons();
         }
 
         // Add message to chat
@@ -210,34 +289,70 @@
 
             if (message || files.length > 0) {
                 try {
-                    // Create FormData and append files
-                    const formData = new FormData();
-                    files.forEach(file => {
-                        formData.append('files', file);
-                    });
+                    // Show progress bar if files are being uploaded
+                    const progressBar = document.getElementById('progress-bar');
+                    const progressText = document.getElementById('progress-text');
+                    const uploadProgress = document.getElementById('upload-progress');
 
-                    // Upload files if any
                     if (files.length > 0) {
-                        const response = await fetch('/upload/multiple', {
-                            method: 'POST',
-                            body: formData
-                        });
+                        uploadProgress.classList.remove('hidden');
+                        progressBar.style.width = '0%';
+                        progressText.textContent = 'Preparing to upload...';
 
-                        if (!response.ok) {
-                            throw new Error('File upload failed');
+                        if (files.length > MAX_FILES) {
+                            throw new Error(`You can only upload ${MAX_FILES} files at a time.`);
                         }
 
-                        const result = await response.json();
-                        console.log('Upload success:', result);
-                    }
+                        // Create FormData and append files
+                        const formData = new FormData();
+                        files.forEach(file => {
+                            formData.append('files', file);
+                        });
 
-                    // Add message to chat
-                    addMessage(message, files);
-                    messageInput.value = '';
-                    clearFiles();
+                        // Upload files with progress tracking
+                        const xhr = new XMLHttpRequest();
+                        xhr.open('POST', '/upload/multiple', true);
+
+                        xhr.upload.onprogress = (e) => {
+                            if (e.lengthComputable) {
+                                const percentComplete = (e.loaded / e.total) * 100;
+                                progressBar.style.width = percentComplete + '%';
+                                progressText.textContent = `Uploading: ${Math.round(percentComplete)}%`;
+                            }
+                        };
+
+                        xhr.onload = function() {
+                            if (xhr.status === 200) {
+                                const result = JSON.parse(xhr.responseText);
+                                console.log('Upload success:', result);
+                                progressText.textContent = 'Upload complete!';
+                                setTimeout(() => {
+                                    uploadProgress.classList.add('hidden');
+                                }, 1500);
+
+                                // Add message to chat with uploaded files
+                                addMessage(message, files);
+                                messageInput.value = '';
+                                clearFiles();
+                            } else {
+                                throw new Error('Upload failed: ' + xhr.statusText);
+                            }
+                        };
+
+                        xhr.onerror = function() {
+                            throw new Error('Network error occurred');
+                        };
+
+                        xhr.send(formData);
+                    } else {
+                        // Just add message if no files
+                        addMessage(message);
+                        messageInput.value = '';
+                    }
                 } catch (error) {
                     console.error('Error:', error);
                     alert('Failed to upload files: ' + error.message);
+                    document.getElementById('upload-progress').classList.add('hidden');
                 }
             }
         });
