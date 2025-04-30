@@ -15,9 +15,14 @@
           class="bg-blue-600 text-white px-6 py-4 rounded-t-lg flex items-center justify-between"
         >
           <h1 class="text-xl font-semibold">AutoTasker Chat</h1>
-          <button onclick="clearChat()" class="text-sm hover:underline">
-            Clear Chat
-          </button>
+          <div class="flex items-center space-x-4">
+            <button onclick="clearChat()" class="text-sm hover:underline">
+              Clear Chat
+            </button>
+            <a href="/login" class="text-sm bg-white text-blue-600 px-4 py-2 rounded-lg hover:bg-blue-50 transition-colors">
+              Login
+            </a>
+          </div>
         </div>
 
         <!-- Messages Area -->
