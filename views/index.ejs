@@ -1,361 +1,533 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>AutoTasker Chat</title>
     <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="bg-gray-100 h-screen">
+  </head>
+  <body class="bg-gray-100 h-screen">
     <div class="container mx-auto px-4 py-8 h-full flex flex-col">
-        <!-- Chat Container -->
-        <div class="bg-white rounded-lg shadow-lg flex flex-col h-full">
-            <!-- Chat Header -->
-            <div class="bg-blue-600 text-white px-6 py-4 rounded-t-lg flex items-center justify-between">
-                <h1 class="text-xl font-semibold">AutoTasker Chat</h1>
-                <button onclick="clearChat()" class="text-sm hover:underline">Clear Chat</button>
-            </div>
-
-            <!-- Messages Area -->
-            <div class="flex-1 p-6 overflow-y-auto space-y-4" id="messages">
-                <!-- Welcome Message -->
-                <div class="flex items-start space-x-4">
-                    <div class="flex-1 bg-gray-50 rounded-lg p-4 max-w-3xl mr-auto">
-                        <p class="text-gray-800">Welcome to AutoTasker! How can I help you today?</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- File Preview Area -->
-            <div class="px-6 py-3 bg-gray-50 border-t border-gray-200 hidden" id="preview-area">
-                <div class="flex items-center justify-between">
-                    <div class="flex items-center space-x-2">
-                        <span class="text-sm text-gray-600">Selected files:</span>
-                        <div id="file-list" class="text-sm text-blue-600"></div>
-                    </div>
-                    <button onclick="clearFiles()" class="text-sm text-red-600 hover:underline">Clear</button>
-                </div>
-                <!-- File Preview Container -->
-                <div class="mt-2">
-                    <!-- Image Preview -->
-                    <div class="flex flex-wrap gap-2" id="image-preview"></div>
-                    <!-- PDF Preview -->
-                    <div class="mt-2 space-y-1" id="pdf-preview"></div>
-                </div>
-                <!-- Upload Progress -->
-                <div id="upload-progress" class="mt-2 hidden">
-                    <div class="w-full bg-gray-200 rounded-full h-2.5">
-                        <div class="bg-blue-600 h-2.5 rounded-full" style="width: 0%" id="progress-bar"></div>
-                    </div>
-                    <p class="text-sm text-gray-600 mt-1" id="progress-text">Uploading...</p>
-                </div>
-            </div>
-
-            <!-- Input Area -->
-            <div class="border-t border-gray-200 p-4">
-                <form id="chat-form" class="space-y-4" enctype="multipart/form-data">
-                    <!-- Text Input -->
-                    <div>
-                        <textarea 
-                            id="message-input"
-                            class="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
-                            rows="3"
-                            placeholder="Type your message..."
-                        ></textarea>
-                    </div>
-
-                    <!-- File Upload and Send Button -->
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center space-x-4">
-                            <!-- File Upload Button -->
-                            <label class="cursor-pointer text-blue-600 hover:text-blue-700 flex items-center space-x-2 px-3 py-2 border border-blue-600 rounded-lg hover:bg-blue-50 transition-colors">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"></path>
-                                </svg>
-                                <span>Attach File</span>
-                                <input type="file" class="hidden" id="file-input" multiple>
-                            </label>
-
-                            <!-- Image Upload Button -->
-                            <label class="cursor-pointer text-blue-600 hover:text-blue-700 flex items-center space-x-2 px-3 py-2 border border-blue-600 rounded-lg hover:bg-blue-50 transition-colors">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                                </svg>
-                                <span>Add Image</span>
-                                <input type="file" class="hidden" id="image-input" accept="image/*" multiple>
-                            </label>
-                        </div>
-
-                        <!-- Send Button -->
-                        <button 
-                            type="submit"
-                            class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2"
-                        >
-                            <span>Send</span>
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
-                            </svg>
-                        </button>
-                    </div>
-                </form>
-            </div>
+      <!-- Chat Container -->
+      <div class="bg-white rounded-lg shadow-lg flex flex-col h-full">
+        <!-- Chat Header -->
+        <div
+          class="bg-blue-600 text-white px-6 py-4 rounded-t-lg flex items-center justify-between"
+        >
+          <h1 class="text-xl font-semibold">AutoTasker Chat</h1>
+          <button onclick="clearChat()" class="text-sm hover:underline">
+            Clear Chat
+          </button>
         </div>
+
+        <!-- Messages Area -->
+        <div class="flex-1 p-6 overflow-y-auto space-y-4" id="messages">
+          <!-- Welcome Message -->
+          <div class="flex items-start space-x-4">
+            <div class="flex-1 bg-gray-50 rounded-lg p-4 max-w-3xl mr-auto">
+              <p class="text-gray-800">
+                Welcome to AutoTasker! How can I help you today?
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- File Preview Area -->
+        <div
+          class="px-6 py-3 bg-gray-50 border-t border-gray-200 hidden"
+          id="preview-area"
+        >
+          <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-2">
+              <span class="text-sm text-gray-600">Selected files:</span>
+              <div id="file-list" class="text-sm text-blue-600"></div>
+            </div>
+            <button
+              onclick="clearFiles()"
+              class="text-sm text-red-600 hover:underline"
+            >
+              Clear
+            </button>
+          </div>
+          <!-- File Preview Container -->
+          <div class="mt-2">
+            <!-- Image Preview -->
+            <div class="flex flex-wrap gap-2" id="image-preview"></div>
+            <!-- PDF Preview -->
+            <div class="mt-2 space-y-1" id="pdf-preview"></div>
+          </div>
+          <!-- Upload Progress -->
+          <div id="upload-progress" class="mt-2 hidden">
+            <div class="w-full bg-gray-200 rounded-full h-2.5">
+              <div
+                class="bg-blue-600 h-2.5 rounded-full"
+                style="width: 0%"
+                id="progress-bar"
+              ></div>
+            </div>
+            <p class="text-sm text-gray-600 mt-1" id="progress-text">
+              Uploading...
+            </p>
+          </div>
+        </div>
+
+        <!-- Input Area -->
+        <div class="border-t border-gray-200 p-4">
+          <form id="chat-form" class="space-y-4" enctype="multipart/form-data">
+            <!-- Text Input -->
+            <div>
+              <textarea
+                id="message-input"
+                class="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                rows="3"
+                placeholder="Type your message..."
+              ></textarea>
+            </div>
+
+            <!-- File Upload and Send Button -->
+            <div class="flex items-center justify-between">
+              <div class="flex items-center space-x-4">
+                <!-- File Upload Button -->
+                <label
+                  class="cursor-pointer text-blue-600 hover:text-blue-700 flex items-center space-x-2 px-3 py-2 border border-blue-600 rounded-lg hover:bg-blue-50 transition-colors"
+                >
+                  <svg
+                    class="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"
+                    ></path>
+                  </svg>
+                  <span>Attach File</span>
+                  <input type="file" class="hidden" id="file-input" accept=".pdf,.txt" multiple />
+                </label>
+
+                <!-- Image Upload Button -->
+                <label
+                  class="cursor-pointer text-blue-600 hover:text-blue-700 flex items-center space-x-2 px-3 py-2 border border-blue-600 rounded-lg hover:bg-blue-50 transition-colors"
+                >
+                  <svg
+                    class="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                    ></path>
+                  </svg>
+                  <span>Add Image</span>
+                  <input
+                    type="file"
+                    class="hidden"
+                    id="image-input"
+                    accept="image/*"
+                    multiple
+                  />
+                </label>
+              </div>
+
+              <!-- Send Button -->
+              <button
+                type="submit"
+                class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2"
+              >
+                <span>Send</span>
+                <svg
+                  class="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M14 5l7 7m0 0l-7 7m7-7H3"
+                  ></path>
+                </svg>
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
     </div>
 
     <script>
-        // DOM Elements
-        const fileInput = document.getElementById('file-input');
-        const imageInput = document.getElementById('image-input');
-        const previewArea = document.getElementById('preview-area');
-        const fileList = document.getElementById('file-list');
-        const imagePreview = document.getElementById('image-preview');
-        const chatForm = document.getElementById('chat-form');
-        const messageInput = document.getElementById('message-input');
-        const messagesContainer = document.getElementById('messages');
+      // DOM Elements
+      const fileInput = document.getElementById("file-input");
+      const imageInput = document.getElementById("image-input");
+      const previewArea = document.getElementById("preview-area");
+      const fileList = document.getElementById("file-list");
+      const imagePreview = document.getElementById("image-preview");
+      const chatForm = document.getElementById("chat-form");
+      const messageInput = document.getElementById("message-input");
+      const messagesContainer = document.getElementById("messages");
 
-        // Track selected files
-        let selectedFiles = [];
-        const MAX_FILES = 2;
+      // Track selected files
+      let selectedFiles = [];
+      const MAX_FILES = 2;
 
-        // Function to update upload button states
-        function updateUploadButtons() {
-            const fileLabel = fileInput.parentElement;
-            const imageLabel = imageInput.parentElement;
-            
-            if (selectedFiles.length >= MAX_FILES) {
-                fileLabel.classList.add('opacity-50', 'cursor-not-allowed');
-                imageLabel.classList.add('opacity-50', 'cursor-not-allowed');
-                fileInput.disabled = true;
-                imageInput.disabled = true;
-            } else {
-                fileLabel.classList.remove('opacity-50', 'cursor-not-allowed');
-                imageLabel.classList.remove('opacity-50', 'cursor-not-allowed');
-                fileInput.disabled = false;
-                imageInput.disabled = false;
-            }
+      // Function to update upload button states
+      function updateUploadButtons() {
+        const fileLabel = fileInput.parentElement;
+        const imageLabel = imageInput.parentElement;
+
+        if (selectedFiles.length >= MAX_FILES) {
+          fileLabel.classList.add("opacity-50", "cursor-not-allowed");
+          imageLabel.classList.add("opacity-50", "cursor-not-allowed");
+          fileInput.disabled = true;
+          imageInput.disabled = true;
+        } else {
+          fileLabel.classList.remove("opacity-50", "cursor-not-allowed");
+          imageLabel.classList.remove("opacity-50", "cursor-not-allowed");
+          fileInput.disabled = false;
+          imageInput.disabled = false;
+        }
+      }
+
+      // Handle file selection
+      function handleFileSelect(event) {
+        const files = Array.from(event.target.files);
+        const remainingSlots = MAX_FILES - selectedFiles.length;
+
+        if (files.length > remainingSlots) {
+          alert(
+            `You can only select ${remainingSlots} more file(s). Please clear some files first.`
+          );
+          event.target.value = "";
+          return;
         }
 
-        // Handle file selection
-        function handleFileSelect(event) {
-            const files = Array.from(event.target.files);
-            const remainingSlots = MAX_FILES - selectedFiles.length;
+        // Add new files to selected files array
+        const newFiles = Array.from(files).filter((newFile) => {
+          // Check if file with same name and type already exists
+          return !selectedFiles.some(
+            (existingFile) =>
+              existingFile.name === newFile.name &&
+              existingFile.type === newFile.type
+          );
+        });
 
-            if (files.length > remainingSlots) {
-                alert(`You can only select ${remainingSlots} more file(s). Please clear some files first.`);
-                event.target.value = '';
-                return;
-            }
+        selectedFiles = [...selectedFiles, ...newFiles];
+        updateUploadButtons();
+        showFilePreview(selectedFiles);
+      }
 
-            // Add new files to selected files array
-            selectedFiles = [...selectedFiles, ...files];
-            updateUploadButtons();
-            showFilePreview(selectedFiles);
+      // Show file preview
+      // Remove specific file from selection
+      function removeFile(fileName) {
+        selectedFiles = selectedFiles.filter((file) => file.name !== fileName);
+        updateUploadButtons();
+        showFilePreview(selectedFiles);
+
+        // Clear input values if no files are selected
+        if (selectedFiles.length === 0) {
+          previewArea.classList.add("hidden");
+          fileInput.value = "";
+          imageInput.value = "";
+        }
+      }
+
+      function showFilePreview(files) {
+        if (files.length === 0) {
+          previewArea.classList.add("hidden");
+          return;
         }
 
-        // Show file preview
-        function showFilePreview(files) {
-            previewArea.classList.remove('hidden');
-            const fileNames = Array.from(files).map(f => f.name);
-            fileList.textContent = `Selected ${files.length} file(s): ${fileNames.join(', ')}`;
+        previewArea.classList.remove("hidden");
+        fileList.textContent = `Selected ${files.length} file(s):`;
 
-            // Clear previous previews
-            imagePreview.innerHTML = '';
-            document.getElementById('pdf-preview').innerHTML = '';
+        // Clear previous previews
+        imagePreview.innerHTML = "";
+        document.getElementById("pdf-preview").innerHTML = "";
 
-            // Process each file
-            Array.from(files).forEach(file => {
-                if (file.type.startsWith('image/')) {
-                    // Image preview
-                    const reader = new FileReader();
-                    reader.onload = function(e) {
-                        const container = document.createElement('div');
-                        container.className = 'relative group';
+        // Process each file
+        Array.from(files).forEach((file) => {
+          if (file.type.startsWith("image/")) {
+            // Image preview
+            const reader = new FileReader();
+            reader.onload = function (e) {
+              const container = document.createElement("div");
+              container.className =
+                "flex items-center justify-between w-full p-2 border border-gray-200 rounded bg-gray-50";
 
-                        const img = document.createElement('img');
-                        img.src = e.target.result;
-                        img.className = 'w-32 h-32 object-cover rounded border border-gray-300';
-                        container.appendChild(img);
+              const imgContainer = document.createElement("div");
+              imgContainer.className = "flex items-center gap-2";
 
-                        const overlay = document.createElement('div');
-                        overlay.className = 'absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity rounded flex items-center justify-center';
-                        
-                        const fileName = document.createElement('p');
-                        fileName.className = 'text-white text-xs text-center px-2';
-                        fileName.textContent = file.name;
-                        overlay.appendChild(fileName);
-                        
-                        container.appendChild(overlay);
-                        imagePreview.appendChild(container);
-                    }
-                    reader.readAsDataURL(file);
-                } else if (file.type === 'application/pdf') {
-                    // PDF preview
-                    const pdfContainer = document.createElement('div');
-                    pdfContainer.className = 'flex items-center space-x-2 p-2 border border-gray-200 rounded';
+              const img = document.createElement("img");
+              img.src = e.target.result;
+              img.className =
+                "w-32 h-32 object-cover rounded border border-gray-300";
 
-                    const icon = document.createElement('div');
-                    icon.innerHTML = `<svg class="w-8 h-8 text-red-500" fill="currentColor" viewBox="0 0 20 20"><path d="M9 2a2 2 0 00-2 2v8a2 2 0 002 2h6a2 2 0 002-2V6.414A2 2 0 0016.414 5L14 2.586A2 2 0 0012.586 2H9z"></path></svg>`;
-                    
-                    const info = document.createElement('div');
-                    info.className = 'flex-1';
-                    info.innerHTML = `
+              const fileName = document.createElement("p");
+              fileName.className = "text-blue-600";
+              fileName.textContent = file.name;
+
+              imgContainer.appendChild(img);
+              imgContainer.appendChild(fileName);
+
+              const removeButton = document.createElement("button");
+              removeButton.className = "text-red-500 hover:text-red-700";
+              removeButton.innerHTML = `
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+              `;
+              removeButton.onclick = () => removeFile(file.name);
+
+              container.appendChild(imgContainer);
+              container.appendChild(removeButton);
+              imagePreview.appendChild(container);
+            };
+            reader.readAsDataURL(file);
+          } else if (file.type === "application/pdf") {
+            // PDF preview
+            const pdfContainer = document.createElement("div");
+            pdfContainer.className =
+              "flex items-center justify-between w-full p-2 border border-gray-200 rounded bg-gray-50";
+
+            const icon = document.createElement("div");
+            icon.innerHTML = `<svg class="w-8 h-8 text-red-500" fill="currentColor" viewBox="0 0 20 20"><path d="M9 2a2 2 0 00-2 2v8a2 2 0 002 2h6a2 2 0 002-2V6.414A2 2 0 0016.414 5L14 2.586A2 2 0 0012.586 2H9z"></path></svg>`;
+
+            const info = document.createElement("div");
+            info.className = "flex-1";
+            info.innerHTML = `
                         <p class="text-sm font-medium">${file.name}</p>
-                        <p class="text-xs text-gray-500">${(file.size / 1024).toFixed(1)} KB</p>
+                        <p class="text-xs text-gray-500">${(
+                          file.size / 1024
+                        ).toFixed(1)} KB</p>
                     `;
 
-                    pdfContainer.appendChild(icon);
-                    pdfContainer.appendChild(info);
-                    document.getElementById('pdf-preview').appendChild(pdfContainer);
-                }
-            });
+            const removeButton = document.createElement("button");
+            removeButton.className = "text-red-500 hover:text-red-700 ml-2";
+            removeButton.innerHTML = `
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    `;
+            removeButton.onclick = () => removeFile(file.name);
+
+            pdfContainer.appendChild(icon);
+            pdfContainer.appendChild(info);
+            pdfContainer.appendChild(removeButton);
+            document.getElementById("pdf-preview").appendChild(pdfContainer);
+          } else if (file.type === "text/plain") {
+            // Text file preview
+            const container = document.createElement("div");
+            container.className =
+              "flex items-center justify-between w-full p-2 border border-gray-200 rounded bg-gray-50";
+
+            const fileLink = document.createElement("a");
+            fileLink.href = URL.createObjectURL(file);
+            fileLink.target = "_blank";
+            fileLink.className =
+              "text-blue-600 hover:underline flex items-center space-x-2";
+
+            // Text file icon
+            const icon = document.createElement("div");
+            icon.innerHTML = `<svg class="w-5 h-5 text-gray-500" fill="currentColor" viewBox="0 0 20 20"><path d="M9 2a2 2 0 00-2 2v8a2 2 0 002 2h6a2 2 0 002-2V6.414A2 2 0 0016.414 5L14 2.586A2 2 0 0012.586 2H9z"></path><path d="M3 8a1 1 0 011-1h4a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h4a1 1 0 110 2H4a1 1 0 01-1-1z" fill="currentColor"></path></svg>`;
+
+            const fileName = document.createElement("span");
+            fileName.textContent = file.name;
+
+            fileLink.appendChild(icon);
+            fileLink.appendChild(fileName);
+
+            const removeButton = document.createElement("button");
+            removeButton.className = "text-red-500 hover:text-red-700";
+            removeButton.innerHTML = `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>`;
+            removeButton.onclick = () => removeFile(file.name);
+
+            container.appendChild(fileLink);
+            container.appendChild(removeButton);
+            document.getElementById("pdf-preview").appendChild(container);
+          }
+        });
+      }
+
+      // Clear files
+      function clearFiles() {
+        fileInput.value = "";
+        imageInput.value = "";
+        previewArea.classList.add("hidden");
+        fileList.textContent = "";
+        imagePreview.innerHTML = "";
+        document.getElementById("pdf-preview").innerHTML = "";
+        selectedFiles = [];
+        updateUploadButtons();
+      }
+
+      // Add message to chat
+      function addMessage(message, files = []) {
+        const messageDiv = document.createElement("div");
+        messageDiv.className = "flex items-start space-x-4";
+
+        const contentDiv = document.createElement("div");
+        contentDiv.className =
+          "flex-1 bg-blue-100 rounded-lg p-4 max-w-3xl ml-auto";
+
+        if (message) {
+          const messageP = document.createElement("p");
+          messageP.className = "text-gray-800";
+          messageP.textContent = message;
+          contentDiv.appendChild(messageP);
         }
 
-        // Clear files
-        function clearFiles() {
-            fileInput.value = '';
-            imageInput.value = '';
-            previewArea.classList.add('hidden');
-            fileList.textContent = '';
-            imagePreview.innerHTML = '';
-            document.getElementById('pdf-preview').innerHTML = '';
-            selectedFiles = [];
-            updateUploadButtons();
-        }
+        if (files.length > 0) {
+          const filesDiv = document.createElement("div");
+          filesDiv.className = "mt-2 space-y-2";
 
-        // Add message to chat
-        function addMessage(message, files = []) {
-            const messageDiv = document.createElement('div');
-            messageDiv.className = 'flex items-start space-x-4';
+          files.forEach((file) => {
+            if (file.type?.startsWith("image/")) {
+              const container = document.createElement("div");
+              container.className =
+                "flex items-center justify-between w-full p-2 border border-gray-200 rounded bg-gray-50";
 
-            const contentDiv = document.createElement('div');
-            contentDiv.className = 'flex-1 bg-blue-100 rounded-lg p-4 max-w-3xl ml-auto';
+              const imgContainer = document.createElement("div");
+              imgContainer.className = "flex items-center gap-2";
 
-            if (message) {
-                const messageP = document.createElement('p');
-                messageP.className = 'text-gray-800';
-                messageP.textContent = message;
-                contentDiv.appendChild(messageP);
+              const img = document.createElement("img");
+              img.src = URL.createObjectURL(file);
+              img.className = "w-12 h-12 object-cover rounded";
+
+              const fileName = document.createElement("span");
+              fileName.className = "text-blue-600";
+              fileName.textContent = file.name;
+
+              imgContainer.appendChild(img);
+              imgContainer.appendChild(fileName);
+
+              container.appendChild(imgContainer);
+              filesDiv.appendChild(container);
+            } else {
+              const fileContainer = document.createElement("div");
+              fileContainer.className =
+                "flex items-center justify-between w-full p-2 border border-gray-200 rounded bg-gray-50";
+
+              const fileInfo = document.createElement("div");
+              fileInfo.className = "text-blue-600";
+              fileInfo.textContent = file.name;
+
+              fileContainer.appendChild(fileInfo);
+              filesDiv.appendChild(fileContainer);
             }
+          });
 
-            if (files.length > 0) {
-                const filesDiv = document.createElement('div');
-                filesDiv.className = 'mt-2 space-y-2';
-
-                files.forEach(file => {
-                    if (file.type?.startsWith('image/')) {
-                        const img = document.createElement('img');
-                        img.src = URL.createObjectURL(file);
-                        img.className = 'img-preview';
-                        filesDiv.appendChild(img);
-                    } else {
-                        const fileLink = document.createElement('div');
-                        fileLink.className = 'text-blue-600';
-                        fileLink.textContent = file.name;
-                        filesDiv.appendChild(fileLink);
-                    }
-                });
-
-                contentDiv.appendChild(filesDiv);
-            }
-
-            messageDiv.appendChild(contentDiv);
-            messagesContainer.appendChild(messageDiv);
-            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+          contentDiv.appendChild(filesDiv);
         }
 
-        // Clear chat
-        function clearChat() {
-            messagesContainer.innerHTML = '';
-            // Add welcome message back
-            const welcomeDiv = document.createElement('div');
-            welcomeDiv.className = 'flex items-start space-x-4';
-            welcomeDiv.innerHTML = `
+        messageDiv.appendChild(contentDiv);
+        messagesContainer.appendChild(messageDiv);
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+      }
+
+      // Clear chat
+      function clearChat() {
+        messagesContainer.innerHTML = "";
+        // Add welcome message back
+        const welcomeDiv = document.createElement("div");
+        welcomeDiv.className = "flex items-start space-x-4";
+        welcomeDiv.innerHTML = `
                 <div class="flex-1 bg-gray-50 rounded-lg p-4 max-w-3xl mr-auto">
                     <p class="text-gray-800">Welcome to AutoTasker! How can I help you today?</p>
                 </div>
             `;
-            messagesContainer.appendChild(welcomeDiv);
-        }
+        messagesContainer.appendChild(welcomeDiv);
+      }
 
-        // Event listeners
-        fileInput.addEventListener('change', handleFileSelect);
-        imageInput.addEventListener('change', handleFileSelect);
+      // Event listeners
+      fileInput.addEventListener("change", handleFileSelect);
+      imageInput.addEventListener("change", handleFileSelect);
 
-        // Form submission
-        chatForm.addEventListener('submit', async function(e) {
-            e.preventDefault();
-            const message = messageInput.value.trim();
-            const files = [...fileInput.files, ...imageInput.files];
+      // Form submission
+      chatForm.addEventListener("submit", async function (e) {
+        e.preventDefault();
+        const message = messageInput.value.trim();
+        const files = selectedFiles; // Use our tracked selectedFiles instead of input files
 
-            if (message || files.length > 0) {
-                try {
-                    // Show progress bar if files are being uploaded
-                    const progressBar = document.getElementById('progress-bar');
-                    const progressText = document.getElementById('progress-text');
-                    const uploadProgress = document.getElementById('upload-progress');
+        if (message || files.length > 0) {
+          try {
+            // Show progress bar if files are being uploaded
+            const progressBar = document.getElementById("progress-bar");
+            const progressText = document.getElementById("progress-text");
+            const uploadProgress = document.getElementById("upload-progress");
 
-                    if (files.length > 0) {
-                        uploadProgress.classList.remove('hidden');
-                        progressBar.style.width = '0%';
-                        progressText.textContent = 'Preparing to upload...';
+            if (files.length > 0) {
+              uploadProgress.classList.remove("hidden");
+              progressBar.style.width = "0%";
+              progressText.textContent = "Preparing to upload...";
 
-                        if (files.length > MAX_FILES) {
-                            throw new Error(`You can only upload ${MAX_FILES} files at a time.`);
-                        }
+              if (files.length > MAX_FILES) {
+                throw new Error(
+                  `You can only upload ${MAX_FILES} files at a time.`
+                );
+              }
 
-                        // Create FormData and append files
-                        const formData = new FormData();
-                        files.forEach(file => {
-                            formData.append('files', file);
-                        });
+              // Create FormData and append files
+              const formData = new FormData();
+              files.forEach((file) => {
+                formData.append("files", file);
+              });
 
-                        // Upload files with progress tracking
-                        const xhr = new XMLHttpRequest();
-                        xhr.open('POST', '/upload/multiple', true);
+              // Upload files with progress tracking
+              const xhr = new XMLHttpRequest();
+              xhr.open("POST", "/upload/multiple", true);
 
-                        xhr.upload.onprogress = (e) => {
-                            if (e.lengthComputable) {
-                                const percentComplete = (e.loaded / e.total) * 100;
-                                progressBar.style.width = percentComplete + '%';
-                                progressText.textContent = `Uploading: ${Math.round(percentComplete)}%`;
-                            }
-                        };
-
-                        xhr.onload = function() {
-                            if (xhr.status === 200) {
-                                const result = JSON.parse(xhr.responseText);
-                                console.log('Upload success:', result);
-                                progressText.textContent = 'Upload complete!';
-                                setTimeout(() => {
-                                    uploadProgress.classList.add('hidden');
-                                }, 1500);
-
-                                // Add message to chat with uploaded files
-                                addMessage(message, files);
-                                messageInput.value = '';
-                                clearFiles();
-                            } else {
-                                throw new Error('Upload failed: ' + xhr.statusText);
-                            }
-                        };
-
-                        xhr.onerror = function() {
-                            throw new Error('Network error occurred');
-                        };
-
-                        xhr.send(formData);
-                    } else {
-                        // Just add message if no files
-                        addMessage(message);
-                        messageInput.value = '';
-                    }
-                } catch (error) {
-                    console.error('Error:', error);
-                    alert('Failed to upload files: ' + error.message);
-                    document.getElementById('upload-progress').classList.add('hidden');
+              xhr.upload.onprogress = (e) => {
+                if (e.lengthComputable) {
+                  const percentComplete = (e.loaded / e.total) * 100;
+                  progressBar.style.width = percentComplete + "%";
+                  progressText.textContent = `Uploading: ${Math.round(
+                    percentComplete
+                  )}%`;
                 }
+              };
+
+              xhr.onload = function () {
+                if (xhr.status === 200) {
+                  const result = JSON.parse(xhr.responseText);
+                  console.log("Upload success:", result);
+                  progressText.textContent = "Upload complete!";
+                  setTimeout(() => {
+                    uploadProgress.classList.add("hidden");
+                  }, 1500);
+
+                  // Add message to chat with uploaded files
+                  addMessage(message, files);
+                  messageInput.value = "";
+                  clearFiles();
+                } else {
+                  throw new Error("Upload failed: " + xhr.statusText);
+                }
+              };
+
+              xhr.onerror = function () {
+                throw new Error("Network error occurred");
+              };
+
+              xhr.send(formData);
+            } else {
+              // Just add message if no files
+              addMessage(message);
+              messageInput.value = "";
             }
-        });
+          } catch (error) {
+            console.error("Error:", error);
+            alert("Failed to upload files: " + error.message);
+            document.getElementById("upload-progress").classList.add("hidden");
+          }
+        }
+      });
     </script>
-</body>
+  </body>
 </html>
