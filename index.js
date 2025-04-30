@@ -18,17 +18,21 @@ const storage = multer.diskStorage({
 
 // File filter for PDFs and Images
 const fileFilter = (req, file, cb) => {
-  const allowedFileTypes = [
-    "application/pdf",
-    "image/jpeg",
-    "image/png",
-    "image/gif",
-  ];
-  if (allowedFileTypes.includes(file.mimetype)) {
+  const allowedFileTypes = {
+    pdf: ["application/pdf"],
+    image: ["image/jpeg", "image/png", "image/gif", "image/webp"],
+  };
+
+  const isAllowedType = Object.values(allowedFileTypes)
+    .flat()
+    .includes(file.mimetype);
+  if (isAllowedType) {
     cb(null, true);
   } else {
     cb(
-      new Error("Invalid file type. Only PDF and image files are allowed."),
+      new Error(
+        `Invalid file type: ${file.mimetype}. Only PDF and image files (JPEG, PNG, GIF, WebP) are allowed.`
+      ),
       false
     );
   }
@@ -70,6 +74,42 @@ app.post("/upload/single", upload.single("file"), (req, res) => {
     });
   } catch (error) {
     res.status(500).json({ error: error.message });
+  }
+});
+
+// Multiple files upload route (max 2 files)
+app.post("/upload/multiple", upload.array("files", 2), (req, res) => {
+  try {
+    if (!req.files || req.files.length === 0) {
+      return res.status(400).json({ error: "No files uploaded" });
+    }
+
+    // Group files by type
+    const groupedFiles = req.files.reduce((acc, file) => {
+      const type = file.mimetype.startsWith("image/") ? "images" : "pdfs";
+      if (!acc[type]) acc[type] = [];
+      acc[type].push({
+        filename: file.filename,
+        originalname: file.originalname,
+        path: file.path,
+        size: file.size,
+        mimetype: file.mimetype,
+        url: `/uploads/${file.filename}`,
+      });
+      return acc;
+    }, {});
+
+    res.json({
+      message: `Successfully uploaded ${req.files.length} file(s)`,
+      totalFiles: req.files.length,
+      ...groupedFiles,
+    });
+  } catch (error) {
+    console.error("File upload error:", error);
+    res.status(500).json({
+      error: error.message,
+      details: "Failed to process file upload",
+    });
   }
 });
 
