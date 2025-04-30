@@ -15,6 +15,10 @@ app.get("/", (req, res) => {
   res.render("index");
 });
 
+app.get("/login", (req, res) => {
+  res.render("login");
+});
+
 // Import and use upload routes
 const uploadRoutes = require("./routes/upload");
 app.use("/upload", uploadRoutes);
