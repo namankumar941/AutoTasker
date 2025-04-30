@@ -21,6 +21,7 @@ const fileFilter = (req, file, cb) => {
   const allowedFileTypes = {
     pdf: ["application/pdf"],
     image: ["image/jpeg", "image/png", "image/gif", "image/webp"],
+    text: ["text/plain"],
   };
 
   const isAllowedType = Object.values(allowedFileTypes)
@@ -79,16 +80,23 @@ app.post("/upload/single", upload.single("file"), (req, res) => {
 
 // Multiple files upload route (max 2 files)
 app.post("/upload/multiple", upload.array("files", 2), (req, res) => {
+  console.log(req.files);
   try {
     if (!req.files || req.files.length === 0) {
       return res.status(400).json({ error: "No files uploaded" });
     }
 
     // Group files by type
-    const groupedFiles = req.files.reduce((acc, file) => {
-      const type = file.mimetype.startsWith("image/") ? "images" : "pdfs";
-      if (!acc[type]) acc[type] = [];
-      acc[type].push({
+    let groupedFiles = {};
+    for (const file of req.files) {
+      const type = file.mimetype.startsWith("image/")
+        ? "images"
+        : file.mimetype.startsWith("text/")
+        ? "text"
+        : "pdfs";
+
+      if (!groupedFiles[type]) groupedFiles[type] = [];
+      groupedFiles[type].push({
         filename: file.filename,
         originalname: file.originalname,
         path: file.path,
@@ -96,9 +104,8 @@ app.post("/upload/multiple", upload.array("files", 2), (req, res) => {
         mimetype: file.mimetype,
         url: `/uploads/${file.filename}`,
       });
-      return acc;
-    }, {});
-
+    }
+    console.log("groupedFiles", groupedFiles);
     res.json({
       message: `Successfully uploaded ${req.files.length} file(s)`,
       totalFiles: req.files.length,
