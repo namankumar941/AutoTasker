@@ -396,16 +396,22 @@
               const imgContainer = document.createElement("div");
               imgContainer.className = "flex items-center gap-2";
 
+              const fileLink = document.createElement("a");
+              fileLink.href = URL.createObjectURL(file);
+              fileLink.target = "_blank";
+              fileLink.className = "flex items-center gap-2";
+
               const img = document.createElement("img");
               img.src = URL.createObjectURL(file);
               img.className = "w-12 h-12 object-cover rounded";
 
               const fileName = document.createElement("span");
-              fileName.className = "text-blue-600";
+              fileName.className = "text-blue-600 hover:underline";
               fileName.textContent = file.name;
 
-              imgContainer.appendChild(img);
-              imgContainer.appendChild(fileName);
+              fileLink.appendChild(img);
+              fileLink.appendChild(fileName);
+              imgContainer.appendChild(fileLink);
 
               container.appendChild(imgContainer);
               filesDiv.appendChild(container);
@@ -414,11 +420,26 @@
               fileContainer.className =
                 "flex items-center justify-between w-full p-2 border border-gray-200 rounded bg-gray-50";
 
-              const fileInfo = document.createElement("div");
-              fileInfo.className = "text-blue-600";
+              const fileLink = document.createElement("a");
+              fileLink.href = URL.createObjectURL(file);
+              fileLink.target = "_blank";
+              fileLink.className = "flex items-center gap-2";
+
+              // Add appropriate icon based on file type
+              const icon = document.createElement("div");
+              if (file.type === "application/pdf") {
+                icon.innerHTML = `<svg class="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 20 20"><path d="M9 2a2 2 0 00-2 2v8a2 2 0 002 2h6a2 2 0 002-2V6.414A2 2 0 0016.414 5L14 2.586A2 2 0 0012.586 2H9z"></path></svg>`;
+              } else if (file.type === "text/plain") {
+                icon.innerHTML = `<svg class="w-5 h-5 text-gray-500" fill="currentColor" viewBox="0 0 20 20"><path d="M9 2a2 2 0 00-2 2v8a2 2 0 002 2h6a2 2 0 002-2V6.414A2 2 0 0016.414 5L14 2.586A2 2 0 0012.586 2H9z"></path><path d="M3 8a1 1 0 011-1h4a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h4a1 1 0 110 2H4a1 1 0 01-1-1z" fill="currentColor"></path></svg>`;
+              }
+
+              const fileInfo = document.createElement("span");
+              fileInfo.className = "text-blue-600 hover:underline";
               fileInfo.textContent = file.name;
 
-              fileContainer.appendChild(fileInfo);
+              fileLink.appendChild(icon);
+              fileLink.appendChild(fileInfo);
+              fileContainer.appendChild(fileLink);
               filesDiv.appendChild(fileContainer);
             }
           });
