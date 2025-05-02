@@ -6,6 +6,10 @@ const session = require("express-session");
 
 const app = express();
 
+// Middleware for parsing JSON and URL-encoded bodies
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
 // Set EJS as the view engine
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
@@ -41,6 +45,9 @@ app.use("/upload", uploadRoutes);
 const Authentication = require("./routes/auth");
 const auth = new Authentication();
 app.use("/auth", auth.setupRoutes());
+
+const LLMRoutes = require("./routes/LLM");
+app.use("/llmcall", LLMRoutes);
 
 // Start server
 const PORT = 3000;
