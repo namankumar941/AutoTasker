@@ -19,7 +19,10 @@
             <button onclick="clearChat()" class="text-sm hover:underline">
               Clear Chat
             </button>
-            <a href="/login" class="text-sm bg-white text-blue-600 px-4 py-2 rounded-lg hover:bg-blue-50 transition-colors">
+            <a
+              href="/login"
+              class="text-sm bg-white text-blue-600 px-4 py-2 rounded-lg hover:bg-blue-50 transition-colors"
+            >
               Login
             </a>
           </div>
@@ -110,7 +113,13 @@
                     ></path>
                   </svg>
                   <span>Attach File</span>
-                  <input type="file" class="hidden" id="file-input" accept=".pdf,.txt" multiple />
+                  <input
+                    type="file"
+                    class="hidden"
+                    id="file-input"
+                    accept=".pdf,.txt"
+                    multiple
+                  />
                 </label>
 
                 <!-- Image Upload Button -->
@@ -372,15 +381,15 @@
         updateUploadButtons();
       }
 
-      // Add message to chat
+      // Add message to chat (client message)
       function addMessage(message, files = []) {
         const messageDiv = document.createElement("div");
-        messageDiv.className = "flex items-start space-x-4";
+        messageDiv.className = "flex items-start justify-end mb-4";
 
         const contentDiv = document.createElement("div");
-        contentDiv.className =
-          "flex-1 bg-blue-100 rounded-lg p-4 max-w-3xl ml-auto";
+        contentDiv.className = "bg-blue-100 rounded-lg p-4 max-w-2xl";
 
+        // Add text message if present
         if (message) {
           const messageP = document.createElement("p");
           messageP.className = "text-gray-800";
@@ -388,65 +397,37 @@
           contentDiv.appendChild(messageP);
         }
 
+        // Add files if present
         if (files.length > 0) {
           const filesDiv = document.createElement("div");
           filesDiv.className = "mt-2 space-y-2";
 
           files.forEach((file) => {
-            if (file.type?.startsWith("image/")) {
-              const container = document.createElement("div");
-              container.className =
-                "flex items-center justify-between w-full p-2 border border-gray-200 rounded bg-gray-50";
+            const fileContainer = document.createElement("div");
+            fileContainer.className =
+              "flex items-center space-x-2 text-sm text-blue-600";
 
-              const imgContainer = document.createElement("div");
-              imgContainer.className = "flex items-center gap-2";
+            const fileLink = document.createElement("a");
+            fileLink.href = URL.createObjectURL(file);
+            fileLink.target = "_blank";
+            fileLink.className = "flex items-center gap-2";
 
-              const fileLink = document.createElement("a");
-              fileLink.href = URL.createObjectURL(file);
-              fileLink.target = "_blank";
-              fileLink.className = "flex items-center gap-2";
+            const fileIcon = document.createElement("span");
+            fileIcon.className = "w-5 h-5";
+            fileIcon.innerHTML = `
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"></path>
+              </svg>
+            `;
 
-              const img = document.createElement("img");
-              img.src = URL.createObjectURL(file);
-              img.className = "w-12 h-12 object-cover rounded";
+            const fileName = document.createElement("span");
+            fileName.className = "text-blue-600 hover:underline";
+            fileName.textContent = file.name;
 
-              const fileName = document.createElement("span");
-              fileName.className = "text-blue-600 hover:underline";
-              fileName.textContent = file.name;
-
-              fileLink.appendChild(img);
-              fileLink.appendChild(fileName);
-              imgContainer.appendChild(fileLink);
-
-              container.appendChild(imgContainer);
-              filesDiv.appendChild(container);
-            } else {
-              const fileContainer = document.createElement("div");
-              fileContainer.className =
-                "flex items-center justify-between w-full p-2 border border-gray-200 rounded bg-gray-50";
-
-              const fileLink = document.createElement("a");
-              fileLink.href = URL.createObjectURL(file);
-              fileLink.target = "_blank";
-              fileLink.className = "flex items-center gap-2";
-
-              // Add appropriate icon based on file type
-              const icon = document.createElement("div");
-              if (file.type === "application/pdf") {
-                icon.innerHTML = `<svg class="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 20 20"><path d="M9 2a2 2 0 00-2 2v8a2 2 0 002 2h6a2 2 0 002-2V6.414A2 2 0 0016.414 5L14 2.586A2 2 0 0012.586 2H9z"></path></svg>`;
-              } else if (file.type === "text/plain") {
-                icon.innerHTML = `<svg class="w-5 h-5 text-gray-500" fill="currentColor" viewBox="0 0 20 20"><path d="M9 2a2 2 0 00-2 2v8a2 2 0 002 2h6a2 2 0 002-2V6.414A2 2 0 0016.414 5L14 2.586A2 2 0 0012.586 2H9z"></path><path d="M3 8a1 1 0 011-1h4a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h4a1 1 0 110 2H4a1 1 0 01-1-1z" fill="currentColor"></path></svg>`;
-              }
-
-              const fileInfo = document.createElement("span");
-              fileInfo.className = "text-blue-600 hover:underline";
-              fileInfo.textContent = file.name;
-
-              fileLink.appendChild(icon);
-              fileLink.appendChild(fileInfo);
-              fileContainer.appendChild(fileLink);
-              filesDiv.appendChild(fileContainer);
-            }
+            fileLink.appendChild(fileIcon);
+            fileLink.appendChild(fileName);
+            fileContainer.appendChild(fileLink);
+            filesDiv.appendChild(fileContainer);
           });
 
           contentDiv.appendChild(filesDiv);
@@ -479,81 +460,151 @@
       chatForm.addEventListener("submit", async function (e) {
         e.preventDefault();
         const message = messageInput.value.trim();
-        const files = selectedFiles; // Use our tracked selectedFiles instead of input files
+        const files = selectedFiles;
+        const sendButton = document.querySelector('button[type="submit"]');
 
         if (message || files.length > 0) {
           try {
+            // Show client message immediately
+            addMessage(message, files);
+
+            // Clear input and files
+            messageInput.value = "";
+            if (files.length > 0) {
+              clearFiles();
+            }
+
+            // Disable send button
+            sendButton.disabled = true;
+            sendButton.classList.add("opacity-50", "cursor-not-allowed");
+
             // Show progress bar if files are being uploaded
             const progressBar = document.getElementById("progress-bar");
             const progressText = document.getElementById("progress-text");
             const uploadProgress = document.getElementById("upload-progress");
 
+            // First handle file uploads if any
+            let uploadedFiles = [];
             if (files.length > 0) {
-              uploadProgress.classList.remove("hidden");
-              progressBar.style.width = "0%";
-              progressText.textContent = "Preparing to upload...";
-
               if (files.length > MAX_FILES) {
                 throw new Error(
                   `You can only upload ${MAX_FILES} files at a time.`
                 );
               }
 
-              // Create FormData and append files
+              uploadProgress.classList.remove("hidden");
+              progressBar.style.width = "0%";
+              progressText.textContent = "Preparing to upload...";
+
               const formData = new FormData();
-              files.forEach((file) => {
-                formData.append("files", file);
-              });
+              files.forEach((file) => formData.append("files", file));
 
-              // Upload files with progress tracking
-              const xhr = new XMLHttpRequest();
-              xhr.open("POST", "/upload/multiple", true);
+              try {
+                const uploadResponse = await fetch("/upload/multiple", {
+                  method: "POST",
+                  body: formData,
+                });
 
-              xhr.upload.onprogress = (e) => {
-                if (e.lengthComputable) {
-                  const percentComplete = (e.loaded / e.total) * 100;
-                  progressBar.style.width = percentComplete + "%";
-                  progressText.textContent = `Uploading: ${Math.round(
-                    percentComplete
-                  )}%`;
+                if (!uploadResponse.ok) {
+                  throw new Error(
+                    "Upload failed: " + uploadResponse.statusText
+                  );
                 }
-              };
 
-              xhr.onload = function () {
-                if (xhr.status === 200) {
-                  const result = JSON.parse(xhr.responseText);
-                  console.log("Upload success:", result);
-                  progressText.textContent = "Upload complete!";
-                  setTimeout(() => {
-                    uploadProgress.classList.add("hidden");
-                  }, 1500);
+                uploadedFiles = await uploadResponse.json();
+                console.log("Upload success:", uploadedFiles);
+                progressText.textContent = "Upload complete!";
+                setTimeout(() => uploadProgress.classList.add("hidden"), 1500);
+              } catch (uploadError) {
+                throw new Error("File upload failed: " + uploadError.message);
+              }
+            }
 
-                  // Add message to chat with uploaded files
-                  addMessage(message, files);
-                  messageInput.value = "";
-                  clearFiles();
-                } else {
-                  throw new Error("Upload failed: " + xhr.statusText);
+            // Send message to LLM
+            const response = await fetch("/llmcall", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                message,
+                files: uploadedFiles,
+              }),
+            });
+
+            if (!response.ok) {
+              throw new Error("Failed to send message");
+            }
+
+            // Handle streaming response
+            const reader = response.body.getReader();
+            let partialMessage = "";
+
+            while (true) {
+              const { value, done } = await reader.read();
+              if (done) break;
+
+              const chunk = new TextDecoder().decode(value);
+              const messages = chunk.split("\n").filter((msg) => msg.trim());
+
+              for (const msg of messages) {
+                try {
+                  const data = JSON.parse(msg);
+                  if (data.message_status === "complete") {
+                    // Re-enable send button when complete
+                    sendButton.disabled = false;
+                    sendButton.classList.remove(
+                      "opacity-50",
+                      "cursor-not-allowed"
+                    );
+                  }
+                  // Update UI with the message content
+                  if (data.content) {
+                    // Create new message for each server response
+                    updateMessageInUI(data.content);
+                  }
+                } catch (e) {
+                  console.error("Error parsing message:", e);
                 }
-              };
-
-              xhr.onerror = function () {
-                throw new Error("Network error occurred");
-              };
-
-              xhr.send(formData);
-            } else {
-              // Just add message if no files
-              addMessage(message);
-              messageInput.value = "";
+              }
             }
           } catch (error) {
             console.error("Error:", error);
-            alert("Failed to upload files: " + error.message);
-            document.getElementById("upload-progress").classList.add("hidden");
+            alert(error.message);
+            // Re-enable send button on error
+            sendButton.disabled = false;
+            sendButton.classList.remove("opacity-50", "cursor-not-allowed");
+            if (files.length > 0) {
+              document
+                .getElementById("upload-progress")
+                .classList.add("hidden");
+            }
           }
         }
       });
+
+      // Function to update message in UI (server message)
+      function updateMessageInUI(content) {
+        // Find the last assistant message or create a new one if none exists
+        let messageDiv = messagesContainer.querySelector(
+          ".assistant-message:last-child"
+        );
+
+        if (!messageDiv) {
+          messageDiv = document.createElement("div");
+          messageDiv.className = "flex items-start mb-4 assistant-message";
+          messageDiv.innerHTML = `
+            <div class="bg-gray-100 rounded-lg p-4 max-w-2xl">
+              <p class="text-gray-800"></p>
+            </div>
+          `;
+          messagesContainer.appendChild(messageDiv);
+        }
+
+        // Update the content of the last message
+        const messageText = messageDiv.querySelector("p");
+        messageText.textContent += content;
+        console.log(textContent);
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+      }
     </script>
   </body>
 </html>
